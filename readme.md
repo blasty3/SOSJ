@@ -1,10 +1,10 @@
-#Service Oriented SystemJ (SOSJ)#
+# Service Oriented SystemJ (SOSJ)
 
 Developed by Udayanto Dwi Atmojo
 
-License: CC By 4.0 NC
+## License: CC By 4.0 NC
 
-For Linux environment:
+## For Linux environment:
 
 To run SOSJ global registry application, execute sosjreg.sh script. The SOSJ global registry should be run on a different machine from your SOSJ programs. Some functions were implemented to enable SOSJ global registry to run on the same computer with SOSJ programs, but they weren't completely finished nor tested.
 
