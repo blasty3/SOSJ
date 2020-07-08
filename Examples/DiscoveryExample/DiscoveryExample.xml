@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<System>
+
+  <SubSystem Name="DiscoveryExample" Local="true" Addr="192.168.1.2" SSExpiry="30000">
+	  
+	   <ClockDomain Name="ConsCD1" Class="ConsCD1">
+      	<SignalChannel>
+		 <oSignal Name="SOSJDisc" CDName="ConsCD1"/> <!-- The default signal name for sending discovery is 'SOSJDisc' -->
+		 <iSignal Name="SOSJDiscReply" CDName="ConsCD1" /> <!-- The default signal name for receiving discovery is 'SOSJDiscReply' -->
+		</SignalChannel>
+      </ClockDomain>
+	  
+  </SubSystem>
+</System>

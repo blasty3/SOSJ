@@ -1,0 +1,89 @@
+//these three imports below are essential to invoke SOSJ API
+
+import systemj.common.*;
+import sysj.*;
+import soart.*;
+
+//when CD1 and CD2 are on two different SOSJ programs
+
+CD1(
+		
+		output String channel InvReqA;
+		input String channel InvRespA;
+		
+		//output String channel Req2;
+		)->{
+			signal R1;
+				{
+					// perform discovery first, then find some parameters of the 'service interface' based on the service description from discovery
+					//...insert code for discovery here...//
+					
+					// end
+					
+					//..if channel reconfiguration is needed.. See paper "Extending SOSJ framework for large-scale dynamic manufacturing systems" by Udayanto et al for more details//
+					
+							String CDSenderName = "CD1"; // CD that sends via channel
+							String ChanSenderName = "InvReqA"; // name of the output channel
+							String CDReceiverName = FindCDReceiverName(param4, param5, param6,...); // name of the CD which will receive the invocation message
+							String ChanReceiverName = FindChannelReceiverName(param7, param8,...); // name of the channel which will receive the invocation message in the receiving CD	
+					
+					//...give command to the RTS to attempt channel reconfiguration
+					boolean reconfstat1 = ConfigureInvocChannel(CDSenderName, ChanSenderName,CDReceiverName, ChanReceiverName);
+					
+					if(reconfstat1){ //..if channel reconfiguration command is acknowledged by the RTS
+						pause; //..allow for one tick for the RTS to reconfigure channel
+						boolean reconfstat2 = SOSJ.GetInvocChannelReconfigStat(servCDName,servChanName); //..check if reconfiguration is successful
+						if(reconfstat2){ //...if reconfiguration is successful... then proceed accordingly
+						
+							String respSSName = "InvocChannelSS1"; //respSSName refers to the SS that the invoking CD belongs to
+							String respCDName = "CD1"; //this refers to the name of the CD that invokes
+							String respChanName = "InvRespA"; //this refers to the input channel of the invoking CD that will receive any replies/responds
+							String actionName = FindDestPort(param1, param2, param3,...); //actionName is the function of the service provider which will be invoked by the client
+							
+							//here create the service invocation message, may include value if needed
+							String msg = SOSJ.CreateChanInvReqMsg(respSSName, respCDName, respChanName, actionName, value){
+							send InvReqA(msg);
+							receive InvRespA;
+							//...further code...
+						}
+					}
+					//..end channel reconfiguration
+					
+				}
+				
+		}
+		
+		CD2(
+			//...other signal/channel declaration
+			input String channel InvReqB;
+			output String channel InvRespB;
+			output String signal actuateConveyor;
+			output signal stopConveyor;
+		)->{
+			{
+					while(true){
+						receive InvReqB;
+						String reqMsg = (String)#InvReqB;
+						//...further code...e.g.//
+						String actionName = SOSJ.GetAction(reqMsg);
+						
+						String data = null;
+						if(actionName.equalsIgnoreString("ActuateForward")){
+							String value = SOSJ.GetData(reqMsg);
+							emit actuateConveyor(value);
+							data = 'OK'; //e.g. acknowledge to return to the client
+						} else if(actionName.equalsIgnoreString("ActuateStop")){
+							emit stopConveyor;
+							data = 'OK';
+						} else {
+							//e.g. unrecognised actionName
+							data = "'actionName not recognised'"
+						}
+						//...code...//
+						String respMsg = SOSJ.CreateChanInvRespMsg(reqMsg, data); //data represents any values/results etc to be returned to the client
+						send InvRespB(respMsg);
+						pause;
+					}
+				}
+		}
+

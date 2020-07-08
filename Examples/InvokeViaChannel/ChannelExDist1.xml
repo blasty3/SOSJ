@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<System>
+	<!-- link config may be not specified at certain scenarios-->
+	<Interconnection>
+		<Link Type="Destination">
+		  <Interface SubSystem="InvocSignalSS1" Class="systemj.desktop.TCPIPInterface" Interface="eth0" Args="192.168.1.10:1112"/>
+		  <Interface SubSystem="InvocSignalSS2" Class="systemj.desktop.TCPIPInterface" Interface="eth1" Args="192.168.1.27:1113"/>
+		</Link>
+	</Interconnection>
+	
+  <SubSystem Name="InvocSignalSS1" Local="true" SSExpiry="10000" Addr = "192.168.1.10">
+     <ClockDomain Name="CD1" Class="CD1" IsServices="false" >
+      	
+      	<SignalChannel>
+			<!-- define the environment signal mapping too, which should match the ones in service description -->
+			<oChannel Name="InvReqA" To="." />
+			<iChannel Name="InvRespA" From="." />
+		
+		</SignalChannel>
+      </ClockDomain>
+      
+
+  </SubSystem>
+  
+    <SubSystem Name="InvocSignalSS2">
+      <ClockDomain Name="CD2"/>
+  </SubSystem>
+  
+</System>

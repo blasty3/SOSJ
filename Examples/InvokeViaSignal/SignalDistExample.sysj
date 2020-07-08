@@ -1,0 +1,69 @@
+//these three imports below are essential to invoke SOSJ API
+
+import systemj.common.*;
+import sysj.*;
+import soart.*;
+
+//when CD1 and CD2 are on two different SOSJ programs
+
+CD1(
+		
+		output String signal InvReqA;
+		input String signal InvRespA;
+		
+		//output String channel Req2;
+		)->{
+			signal R1;
+				{
+					// perform discovery first, then find some parameters of the 'service interface' based on the service description from discovery
+					//...insert code for discovery here...//
+					String CDReqName = "CD1"; //CDReqName refers to the CD name that calls the method
+					String SignalRespName = "InvRespA"; //this refers to the input signal in the CD used to receive reply from the service provider
+					String DestAddr = FindDestAddr(param1,param2,serviceDescription); //DestAddr is the address of the service provider
+					String DestPort = FindDestPort(param1,param2,serviceDescription); //DestPort is the physical port used to invoke the service
+					String actionName = FindDestPort(param1, param2, param3,...); //actionName is the function of the service provider which will be invoked by the client
+					// end
+					
+					//here create the service invocation message, can include value if needed
+					String msg = SOSJ.CreateSigInvocReqMsg(CDReqName, SignalRespName, DestAddr, DestPort,actionName,value);
+							emit InvReqA(msg);
+							await (InvRespA);
+							pause;
+					//further code
+				}
+				
+		}
+		
+		CD2(
+			//...other signal/channel declaration
+			input String signal InvReqB;
+			output String signal actuateConveyor;
+			output signal stopConveyor;
+			output String signal InvRespB;
+		)->{
+			{
+					while(true){
+						await (InvReqB);
+						String reqMsg = (String)#InvReqB;
+						//...further code of the implementation...//
+						String actionName = SOSJ.GetAction(reqMsg);
+						
+						String data =null;
+						if(actionName.equalsIgnoreString("ActuateForward")){
+							String value = SOSJ.GetData(reqMsg);
+							emit actuateConveyor(value);
+							data = 'OK'; //e.g. acknowledge to return to the client
+						} else if(actionName.equalsIgnoreString("ActuateStop")){
+							emit stopConveyor;
+							data = 'OK';
+						} else {
+							//e.g. unrecognised actionName
+							data = "'actionName not recognised'"
+						}
+						String respMsg = SOSJ.CreateSigInvocRespMsg(reqMsg,data); //data represents any values/results etc to be returned to the client
+						emit InvRespB(respMsg);
+						pause;
+					}
+				}
+		}
+

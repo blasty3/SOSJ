@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<System>
+  <SubSystem Name="InvocSignalSS2" Local="true" SSExpiry="20000" Addr = "192.168.1.27">
+      <ClockDomain Name="CD2" Class="CD2" IsServices="true" >
+      	<Services>
+      		<serviceDescription 
+      			serviceName="actuateConveyor" 
+      			nodeAddress="192.168.1.27" 
+      			associatedCDName="CD2">
+			<physicalDescription>
+      			<parameter name="Dimension" description="xAxis" unit="centimeter" from="0.00" to="360.00" />
+      			<parameter name="Dimension" description="yAxis" unit="centimeter" from="60.00" to="60.00" />
+      			<parameter name="Dimension" description="zAxis" unit="centimeter" from="0.00" to="0.00" />
+				<parameter name="DeviceIdentifier" value="Conv_1"  />
+      		</physicalDescription>
+			<!-- define the action. name is action name, etc -->
+      		<action>
+      		 	<actionAttributes 
+      		 		name="ActuateForward"
+      		 		keyword="conveyor" 
+      		 		description="actuate conveyor with rotation at clockwise direction" >
+      		 		<actionParameters>
+      					<parameter name="Direction" value="forward" />
+      					<parameter name="StartPoint" xAxis="360.00" yAxis="60.00" zAxis="0.00" unit="centimeter" />
+      					<parameter name="EndPoint" xAxis="0.00" yAxis="60.00" zAxis="0.00" unit="centimeter" />
+						<parameter name="ValueRange" minValue="1" maxValue="100" />
+      				</actionParameters>
+					<actionInterfaces>
+      					<interface name="InvReqB" type="signal" direction="input" />
+      					<interface name="InvRespB" type="signal" direction="output" />
+      				</actionInterfaces>
+      		 	</actionAttributes>
+      		</action>
+      		
+      		<action>
+      		 	<actionAttributes 
+      		 		name="ActuateStop" 
+      		 		keyword="conveyor" 
+      		 		description="stop conveyor" >
+      		 		<actionParameters>
+      					<parameter name="Direction" value="stop"  />
+						<parameter name="ValueRange" minValue="NoValue" maxValue="NoValue" />
+      				</actionParameters>
+					<actionInterfaces>
+      					<interface name="InvReqB" type="signal" direction="input" />
+      					<interface name="InvRespB" type="signal" direction="output" />
+      				</actionInterfaces>
+      		 	</actionAttributes>
+      		</action>
+      	    </serviceDescription>
+      	</Services>
+      	<SignalChannel>
+			<!-- define the environment signal mapping here, which should match the ones in service description -->
+			<oSignal Name="InvRespB" Class="systemj.signals.network.UDPSenderSOASig" />
+			<oSignal Name="actuateConveyor" Class="systemj.signals.network.UDPSender" IP="192.168.1.100" Port="8776" />
+			<oSignal Name="stopConveyor" Class="systemj.signals.network.UDPSender" IP="192.168.1.100" Port="8777" />
+			<iSignal Name="InvReqB" Class="systemj.signals.network.UDPReceiver"  IP="192.168.1.27" Port="7676"/>
+		</SignalChannel>
+      </ClockDomain>
+  </SubSystem>
+</System>

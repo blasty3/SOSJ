@@ -1,0 +1,68 @@
+//these three imports below are essential to invoke SOSJ API
+
+import systemj.common.*;
+import sysj.*;
+import soart.*;
+
+ConsCD1(
+		output signal SOSJDisc;
+		input String signal SOSJDiscReply;
+)->{
+	signal R1,R2;
+	{
+		//...further code...//
+		long timeOutVal = 5000; //timeout val, example 5000 ms, set to any value as needed.
+		long startTime = System.currentTimeMillis();
+		long endTime = System.currentTimeMillis();
+		String discResult = null;
+		
+		//the current RTS implementation of Discovery doesn't guarantee success transmission and receiving of Discovery and Discovery reply, so consider repeating til successful..//
+		abort(R1){
+			while(true){
+				abort(R2){
+					emit SOSJDisc;
+						while(true){
+							//...keep checking if discovery reply has been received
+							present(SOSJDiscReply){
+								discResult = (String)#SOSJDiscReply;
+								emit R1; //abort discovery
+								//...further code if needed...//
+							} else {
+								endTime = System.currentTimeMillis();
+								if(endTime-startTime>timeoutVal){
+									//...probably the transmission is lost, let's resend discovery
+									emit R2;
+								}
+							}
+							pause;
+						}
+					}
+				pause;
+			}
+		}
+		//...further code...//
+		
+		SOSJ.StoreServiceToRegistry(discResult); //store discovery result in the RTS
+		
+		String storedOwnServDesc = SOSJ.GetLocalRegistry(); //fetch service description of CDs running in the subsystem, from the RTS
+		String storedDiscResult = SOSJ.GetStoredServiceDescription(); //fetch stored discovery results from the RTS
+		
+		//..further code...//
+		
+		/*
+		##PLEASE NOTE: Due to its present implementation, using the same SOSJDisc and SOSJDiscReply signals in one CD by more than one reactions is not possible. If there are more than one reactions that needs results from discovery, instead uses internal signals to pass the discovery results from one reaction (that performs the discovery) to other reactions. Also, awaiting SOSJDiscReply signal only is not possible without preceded by the emission of SOSJDisc which needs to occur beforehand.
+		*/
+		
+		/*
+			alternatively, can use await instead of present, like:
+			
+			emit SOSJDisc;
+			await (SOSJDiscReply);
+			
+			however the current implementation doesn't guarantee successful transmission and receiving of discovery & discovery reply message, so it's possible that the program can be blocked on the await indefinitely unless it is aborted through a signal.
+		*/
+		
+		//...what to do with the discovery result
+	 }   
+	     //..further code..//
+	}
